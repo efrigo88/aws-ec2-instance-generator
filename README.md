@@ -61,8 +61,8 @@ A Terraform-based infrastructure as code (IaC) project for automating the creati
 6. Commands to copy a repo to the EC2 instance:
    ```bash
     ssh -i key.pem ubuntu@<EC2-IP> "sudo mkdir -p /home/ubuntu/app/repository && sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
-    scp -i key.pem -r ../mutt/<repo-name> ubuntu@<EC2-IP>:/home/ubuntu/app/repository
-    rsync -avz -e "ssh -i key.pem" --exclude='.venv' ../mutt/<repo-name>/ ubuntu@<EC2-IP>:/home/ubuntu/app/repository/
+
+    rsync -avz -e "ssh -i key.pem" --exclude='.venv' ../mutt/repo-name/ ubuntu@<EC2-IP>:/home/ubuntu/app/repository/
    ```
 
 ## Configuration
