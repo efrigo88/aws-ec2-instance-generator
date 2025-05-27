@@ -170,3 +170,5 @@ data/
 RAG/data/
 *declaration.md
 *declaracion.md
+
+*.pem
