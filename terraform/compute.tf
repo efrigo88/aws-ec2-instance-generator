@@ -1,7 +1,8 @@
 locals {
   # https://aws.amazon.com/ec2/instance-types/
   # instance_type = "g5.4xlarge"
-  instance_type = "m5.4xlarge"
+  # instance_type = "m5.4xlarge"
+  instance_type = "c7i.8xlarge"
   volume_size   = 200
 }
 
