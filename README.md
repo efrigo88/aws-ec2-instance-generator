@@ -65,6 +65,11 @@ A Terraform-based infrastructure as code (IaC) project for automating the creati
     rsync -avz -e "ssh -i key.pem" --exclude='.venv' ../mutt/repo-name/ ubuntu@<EC2-IP>:/home/ubuntu/app/repository/
    ```
 
+7. Command to copy the output from the EC2 instance to your PC:
+   ```bash
+   rsync -avz -e "ssh -i key.pem -o IdentitiesOnly=yes" ubuntu@<EC2-IP>:/home/ubuntu/app/repository/data/output/ ~/Downloads/
+   ```
+
 ## Configuration
 
 The project uses variables defined in `terraform/variables.tf` to customize the deployment. Key variables include:
