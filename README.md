@@ -60,14 +60,25 @@ A Terraform-based infrastructure as code (IaC) project for automating the creati
 
 6. Commands to copy a repo to the EC2 instance:
    ```bash
-    ssh -i key.pem ubuntu@<EC2-IP> "sudo mkdir -p /home/ubuntu/app/repository && sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
+    ssh -i key.pem ubuntu@<EC2-IP> \
+      "sudo mkdir -p /home/ubuntu/app/repository && \
+       sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
 
-    rsync -avz -e "ssh -i key.pem" --exclude='.venv' ../<PATH-TO-REPO>/ ubuntu@<EC2-IP>:/home/ubuntu/app/repository/
+   rsync -avz -e "ssh -i key.pem" \
+     --exclude='.venv' \
+     --exclude='.git' \
+     --exclude='data/stage' \
+     --exclude='data/output' \
+     ../<PATH-TO-REPO>/ \
+     ubuntu@<EC2-IP>:/home/ubuntu/app/repository/
    ```
 
 7. Command to copy the output from the EC2 instance to your PC:
    ```bash
-   rsync -avz -e "ssh -i key.pem -o IdentitiesOnly=yes" ubuntu@<EC2-IP>:/home/ubuntu/app/repository/data/output/ ~/Downloads/
+    rsync -avz \
+      -e "ssh -i key.pem -o IdentitiesOnly=yes" \
+      ubuntu@<EC2-IP>:/home/ubuntu/app/repository/data/output/ \
+      ~/Downloads/
    ```
 
 ## Configuration
