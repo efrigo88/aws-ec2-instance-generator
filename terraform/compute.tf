@@ -26,12 +26,12 @@ resource "aws_instance" "aws-ec2-lab" {
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
   key_name               = aws_key_pair.ssh_key.key_name
 
-  instance_market_options {
-    market_type = "spot"
-    spot_options {
-      max_price = "2.0" # Maximum price you're willing to pay per hour
-    }
-  }
+  # instance_market_options {
+  #   market_type = "spot"
+  #   spot_options {
+  #     max_price = "2.0" # Maximum price you're willing to pay per hour
+  #   }
+  # }
 
   root_block_device {
     delete_on_termination = true
