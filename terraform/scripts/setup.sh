@@ -18,9 +18,6 @@ apt install -y apt-transport-https ca-certificates curl software-properties-comm
 # Install AWS CLI
 apt install -y awscli
 
-# Install NVIDIA drivers
-apt install -y nvidia-driver-535
-
 # Install Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
@@ -35,41 +32,11 @@ chmod +x /usr/local/bin/docker-compose
 # Add ubuntu user to docker group
 usermod -aG docker ubuntu
 
-# Install NVIDIA Container Toolkit
-distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
-curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
-curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list
-apt update
-apt install -y nvidia-docker2
-
-# Set NVIDIA as default runtime for Docker
-mkdir -p /etc/docker
-cat <<EOF_DOCKER_CONF > /etc/docker/daemon.json
-{
-  "default-runtime": "nvidia",
-  "runtimes": {
-    "nvidia": {
-      "path": "nvidia-container-runtime",
-      "runtimeArgs": []
-    }
-  }
-}
-EOF_DOCKER_CONF
-
-# Restart Docker to apply NVIDIA runtime config
-systemctl restart docker
-
-# Wait for NVIDIA drivers to be ready
-echo "Waiting for NVIDIA drivers to be ready..."
-sleep 15
-
-# Verify GPU setup
+# Verify installations
 echo "----------------------------------------"
-echo "Verifying GPU setup at $(date)"
-echo "NVIDIA Driver Version:"
-nvidia-smi || echo "NVIDIA driver not ready yet"
-echo "----------------------------------------"
-echo "Verifying Docker GPU support:"
-docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi || echo "Docker GPU support not ready yet"
-echo "----------------------------------------"
+echo "Verifying installations at $(date)"
+echo "Docker version:"
+docker --version
+echo "Docker Compose version:"
+docker-compose --version
 echo "Setup completed at $(date)"

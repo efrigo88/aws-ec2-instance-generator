@@ -1,6 +1,6 @@
 locals {
-  # https://aws.amazon.com/ec2/instance-types/
-  instance_type = "g5.xlarge"
+  instance_type = "c7i.8xlarge"
+  init_script   = file("${path.module}/scripts/setup.sh")
   volume_size   = 200
 }
 
@@ -26,6 +26,7 @@ resource "aws_instance" "aws-ec2-lab" {
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
   key_name               = aws_key_pair.ssh_key.key_name
 
+  # In case the instance type is spot, uncomment the following block
   # instance_market_options {
   #   market_type = "spot"
   #   spot_options {
@@ -39,7 +40,7 @@ resource "aws_instance" "aws-ec2-lab" {
     volume_type           = "gp3"
   }
 
-  user_data = file("${path.module}/scripts/setup.sh")
+  user_data = local.init_script
 }
 
 output "ec2_public_ip" {
