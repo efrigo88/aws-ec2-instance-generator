@@ -1,6 +1,6 @@
 locals {
-  instance_type = "c7i.8xlarge"
-  init_script   = file("${path.module}/scripts/setup.sh")
+  instance_type = "g5.xlarge"
+  init_script   = file("${path.module}/scripts/setup_gpu.sh")
   volume_size   = 200
 }
 
