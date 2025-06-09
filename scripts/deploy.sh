@@ -32,8 +32,13 @@ cd ..
 # Add permissions to the key
 chmod 400 ./key.pem
 
-echo "Copying GitHub SSH keys to EC2..."
+echo "Waiting for EC2 instance to be ready..."
+while ! nc -z ${EC2_IP} 22; do
+  sleep 5
+done
+echo "EC2 instance is ready at ${EC2_IP}"
 
+echo "Copying GitHub SSH keys to EC2..."
 if [ ! -f "$SSH_KEY_PATH" ]; then
   echo "GitHub SSH key not found at $SSH_KEY_PATH. Please ensure the key exists."
   exit 1
