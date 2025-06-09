@@ -39,4 +39,16 @@ echo "Docker version:"
 docker --version
 echo "Docker Compose version:"
 docker-compose --version
+
+echo "Clone the private repo using the copied SSH key"
+REPO_URL="git@github.com:MuttData/tram-case-research.git"
+if [ -f /home/ubuntu/.ssh/id_rsa ]; then
+  echo "Cloning private repo into /home/ubuntu/app/repository..."
+  export GIT_SSH_COMMAND="ssh -i /home/ubuntu/.ssh/id_rsa -o StrictHostKeyChecking=no"
+  git clone $REPO_URL /home/ubuntu/app/repository || echo "Repo clone failed. Check SSH key permissions."
+else
+  echo "SSH key not found, skipping repo clone."
+fi
+
+echo "----------------------------------------"
 echo "Setup completed at $(date)"
