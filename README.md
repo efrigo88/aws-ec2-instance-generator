@@ -58,7 +58,7 @@ A Terraform-based infrastructure as code (IaC) project for automating the creati
    terraform apply
    ```
 
-6. Commands to copy a repo to the EC2 instance:
+6. Commands to manually copy a repo to the EC2 instance:
    ```bash
     ssh -i key.pem ubuntu@<EC2-IP> \
       "sudo mkdir -p /home/ubuntu/app/repository && \
@@ -80,6 +80,25 @@ A Terraform-based infrastructure as code (IaC) project for automating the creati
       ubuntu@<EC2-IP>:/home/ubuntu/app/repository/data/output/ \
       ~/Downloads/
    ```
+
+## Automated Private Repo Cloning
+
+This project supports automated cloning of a private GitHub repository into the EC2 instance during provisioning. The process works as follows:
+
+- Your SSH private and public keys are securely copied to the EC2 instance after it is created (see `scripts/deploy.sh`).
+- The setup script (`terraform/scripts/setup_gpu.sh`) checks for the presence of the SSH key and, if found, automatically clones the private repository into `/home/ubuntu/app/repository`.
+- The SSH key is used only for the cloning process and permissions are set securely on the instance.
+
+**No manual intervention is required to copy or clone the repository.**
+
+### Requirements
+- You must have your GitHub SSH private key (e.g. `~/.ssh/id_rsa_example`) and public key (e.g. `~/.ssh/id_rsa_example.pub`) available on your local machine.
+- The `.env` file must define `SSH_KEY_ROOT_PATH` (e.g., `/Users/youruser/.ssh`) and `SSH_KEY_FILE_NAME` (e.g. `id_rsa_example`) to point to your SSH key location.
+
+### How it works
+1. The deployment script waits for the EC2 instance to be ready for SSH.
+2. It copies your SSH key to the instance and sets the correct permissions.
+3. The setup script on the EC2 instance uses this key to clone the private repository automatically (e.g. `git@github.com:yourorg/your-private-repo.git`).
 
 ## Configuration
 
