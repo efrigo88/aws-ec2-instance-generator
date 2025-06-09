@@ -11,6 +11,11 @@ export AWS_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY
 export AWS_DEFAULT_REGION
 
+# GitHub SSH key configuration
+export SSH_KEY_ROOT_PATH
+export SSH_KEY_FILE_NAME
+SSH_KEY_PATH="$SSH_KEY_ROOT_PATH/$SSH_KEY_FILE_NAME"
+
 # Initialize and apply Terraform
 cd terraform
 terraform init
@@ -28,9 +33,7 @@ cd ..
 chmod 400 ./key.pem
 
 echo "Copying GitHub SSH keys to EC2..."
-SSH_KEY_ROOT_PATH=~/.ssh
-SSH_KEY_FILE_NAME="mutt"
-SSH_KEY_PATH="$SSH_KEY_ROOT_PATH/$SSH_KEY_FILE_NAME"
+
 if [ ! -f "$SSH_KEY_PATH" ]; then
   echo "GitHub SSH key not found at $SSH_KEY_PATH. Please ensure the key exists."
   exit 1
