@@ -41,6 +41,10 @@ resource "aws_instance" "aws-ec2-lab" {
   }
 
   user_data = local.init_script
+
+  tags = {
+    Name = var.project_name
+  }
 }
 
 output "ec2_public_ip" {
