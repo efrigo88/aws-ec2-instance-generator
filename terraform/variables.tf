@@ -14,5 +14,5 @@ variable "project_name" {
 variable "environment" {
   description = "Environment name (e.g., dev, prod)"
   type        = string
-  default     = "sandbox"
+  default     = "playground"
 }

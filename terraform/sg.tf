@@ -1,5 +1,5 @@
 resource "aws_security_group" "ec2_sg" {
-  name        = "ec2-security-group"
+  name        = "ec2-security-group-${var.project_name}-${var.environment}"
   description = "Security group for EC2 instance"
   vpc_id      = aws_vpc.main.id
 
@@ -8,6 +8,15 @@ resource "aws_security_group" "ec2_sg" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "SSH access"
+  }
+
+  ingress {
+    from_port   = 11434
+    to_port     = 11434
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Ollama API access"
   }
 
   egress {
@@ -18,6 +27,6 @@ resource "aws_security_group" "ec2_sg" {
   }
 
   tags = {
-    Name = "ec2-security-group"
+    Name = "ec2-security-group-${var.project_name}-${var.environment}"
   }
 }

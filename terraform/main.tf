@@ -1,6 +1,6 @@
 locals {
   instance_type = "g5.xlarge"
-  init_script   = file("${path.module}/scripts/setup_gpu.sh")
+  init_script   = file("${path.module}/setup.sh")
   volume_size   = 200
 }
 
@@ -26,14 +26,6 @@ resource "aws_instance" "aws-ec2-lab" {
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
   key_name               = aws_key_pair.ssh_key.key_name
 
-  # In case the instance type is spot, uncomment the following block
-  # instance_market_options {
-  #   market_type = "spot"
-  #   spot_options {
-  #     max_price = "2.0" # Maximum price you're willing to pay per hour
-  #   }
-  # }
-
   root_block_device {
     delete_on_termination = true
     volume_size           = local.volume_size
@@ -50,4 +42,9 @@ resource "aws_instance" "aws-ec2-lab" {
 output "ec2_public_ip" {
   value       = aws_instance.aws-ec2-lab.public_ip
   description = "Public IP address of the EC2 instance"
+}
+
+output "ollama_api_endpoint" {
+  value       = "http://${aws_instance.aws-ec2-lab.public_ip}:11434"
+  description = "Ollama API endpoint URL"
 }
