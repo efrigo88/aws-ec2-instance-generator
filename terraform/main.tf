@@ -25,6 +25,7 @@ resource "aws_instance" "aws-ec2-lab" {
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
   key_name               = aws_key_pair.ssh_key.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_cloudwatch_instance_profile.name
 
   root_block_device {
     delete_on_termination = true

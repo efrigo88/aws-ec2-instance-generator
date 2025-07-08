@@ -26,7 +26,8 @@ resource "aws_iam_policy" "cloudwatch_logs_policy" {
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents",
-          "logs:DescribeLogStreams"
+          "logs:DescribeLogStreams",
+          "logs:DescribeLogGroups"
         ]
         Resource = "arn:aws:logs:*:*:*"
       }
@@ -42,4 +43,4 @@ resource "aws_iam_role_policy_attachment" "attach_cloudwatch_logs_policy" {
 resource "aws_iam_instance_profile" "ec2_cloudwatch_instance_profile" {
   name = "ec2-cloudwatch-instance-profile-${var.project_name}-${var.environment}"
   role = aws_iam_role.ec2_cloudwatch_role.name
-} 
+}

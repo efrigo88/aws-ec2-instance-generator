@@ -7,12 +7,22 @@ exec 2>&1
 echo "Starting setup at $(date)"
 echo "----------------------------------------"
 
+# Update system and install base packages
+apt update
+apt install -y apt-transport-https ca-certificates curl software-properties-common gnupg lsb-release awscli
+
 # Install CloudWatch Agent
+echo "Installing CloudWatch Agent..."
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 dpkg -i -E ./amazon-cloudwatch-agent.deb
 
 # Configure CloudWatch Agent for setup logs
-cat >/opt/aws/amazon-cloudwatch-agent/bin/config.json <<EOF
+echo "Configuring CloudWatch Agent..."
+INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+
+# Create config in the correct location
+mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
+cat >/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
 {
   "logs": {
     "logs_collected": {
@@ -21,29 +31,16 @@ cat >/opt/aws/amazon-cloudwatch-agent/bin/config.json <<EOF
           {
             "file_path": "/home/ubuntu/setup.log",
             "log_group_name": "/aws/ec2-ollama-engine/logs",
-            "log_stream_name": "{instance_id}-setup",
-            "timezone": "UTC"
+            "log_stream_name": "${INSTANCE_ID}-setup",
+            "timezone": "UTC",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S"
           },
           {
             "file_path": "/var/log/syslog",
             "log_group_name": "/aws/ec2-ollama-engine/logs",
-            "log_stream_name": "{instance_id}-system",
-            "timezone": "UTC"
-          },
-          {
-            "file_path": "/var/log/auth.log",
-            "log_group_name": "/aws/ec2-ollama-engine/logs",
-            "log_stream_name": "{instance_id}-auth",
+            "log_stream_name": "${INSTANCE_ID}-system",
             "timezone": "UTC"
           }
-        ]
-      }
-    },
-    "systemd": {
-      "logs_collected": {
-        "units": [
-          "ollama",
-          "amazon-cloudwatch-agent"
         ]
       }
     }
@@ -51,14 +48,43 @@ cat >/opt/aws/amazon-cloudwatch-agent/bin/config.json <<EOF
 }
 EOF
 
-# Start CloudWatch Agent
+# Also create the config in the bin directory for the fetch-config command
+cp /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+# Start CloudWatch Agent with proper error handling
+echo "Starting CloudWatch Agent..."
+
+# Use the fetch-config command which will place the config in the correct location
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+# Enable and start the service
 systemctl enable amazon-cloudwatch-agent
 systemctl start amazon-cloudwatch-agent
 
-# Update system and install base packages
-apt update
-apt install -y apt-transport-https ca-certificates curl software-properties-common gnupg lsb-release
+# Wait for CloudWatch Agent to start and retry if needed
+echo "Waiting for CloudWatch Agent to start..."
+sleep 10
+
+# Retry starting if not running
+if ! systemctl is-active --quiet amazon-cloudwatch-agent; then
+    echo "CloudWatch Agent not running, retrying..."
+    systemctl restart amazon-cloudwatch-agent
+    sleep 5
+fi
+
+# Verify CloudWatch Agent is running
+echo "Verifying CloudWatch Agent status..."
+if systemctl is-active --quiet amazon-cloudwatch-agent; then
+    echo "✅ CloudWatch Agent is running successfully"
+    systemctl status amazon-cloudwatch-agent --no-pager
+else
+    echo "❌ CloudWatch Agent failed to start"
+    systemctl status amazon-cloudwatch-agent --no-pager
+    journalctl -u amazon-cloudwatch-agent --no-pager -n 20
+fi
+
+echo "CloudWatch Agent logs (last 10 lines):"
+journalctl -u amazon-cloudwatch-agent --no-pager -n 10
 
 # Install Ollama
 echo "Installing Ollama..."
