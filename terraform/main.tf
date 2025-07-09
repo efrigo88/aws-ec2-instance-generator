@@ -1,6 +1,6 @@
 locals {
   instance_type = "g5.xlarge"
-  init_script   = file("${path.module}/setup.sh")
+  init_script   = file("${path.module}/ec2_bootstrap.sh")
   volume_size   = 200
 }
 

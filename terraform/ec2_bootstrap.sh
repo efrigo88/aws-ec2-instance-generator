@@ -11,6 +11,9 @@ echo "----------------------------------------"
 apt update
 apt install -y apt-transport-https ca-certificates curl software-properties-common gnupg lsb-release awscli
 
+# Install NVIDIA drivers
+apt install -y nvidia-driver-535
+
 # Install CloudWatch Agent
 echo "Installing CloudWatch Agent..."
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
@@ -34,12 +37,6 @@ cat >/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
             "log_stream_name": "${INSTANCE_ID}-setup",
             "timezone": "UTC",
             "timestamp_format": "%Y-%m-%d %H:%M:%S"
-          },
-          {
-            "file_path": "/var/log/syslog",
-            "log_group_name": "/aws/ec2-ollama-engine/logs",
-            "log_stream_name": "${INSTANCE_ID}-system",
-            "timezone": "UTC"
           }
         ]
       }
@@ -61,16 +58,9 @@ echo "Starting CloudWatch Agent..."
 systemctl enable amazon-cloudwatch-agent
 systemctl start amazon-cloudwatch-agent
 
-# Wait for CloudWatch Agent to start and retry if needed
+# Wait for CloudWatch Agent to start
 echo "Waiting for CloudWatch Agent to start..."
 sleep 10
-
-# Retry starting if not running
-if ! systemctl is-active --quiet amazon-cloudwatch-agent; then
-    echo "CloudWatch Agent not running, retrying..."
-    systemctl restart amazon-cloudwatch-agent
-    sleep 5
-fi
 
 # Verify CloudWatch Agent is running
 echo "Verifying CloudWatch Agent status..."
@@ -82,9 +72,6 @@ else
     systemctl status amazon-cloudwatch-agent --no-pager
     journalctl -u amazon-cloudwatch-agent --no-pager -n 20
 fi
-
-echo "CloudWatch Agent logs (last 10 lines):"
-journalctl -u amazon-cloudwatch-agent --no-pager -n 10
 
 # Install Ollama
 echo "Installing Ollama..."
@@ -120,6 +107,11 @@ echo "Ollama service status:"
 systemctl status ollama --no-pager
 
 echo "Ollama is running on port 11434"
+
+# Verify GPU setup
+echo "Verifying GPU setup at $(date)"
+echo "NVIDIA Driver Version:"
+nvidia-smi || echo "NVIDIA driver not ready yet"
 
 echo "----------------------------------------"
 echo "Setup completed at $(date)"
